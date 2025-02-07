@@ -1,3 +1,6 @@
+## To run the project run:
+
+```
 python -m venv venv
 
 Windows (Command Prompt):
@@ -9,4 +12,8 @@ pip install pygame
 
 python main.py
 
-(optional) pip freeze > requirements.txt 
+```
+(optional) 
+```
+pip freeze > requirements.txt 
+```
