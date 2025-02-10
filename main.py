@@ -14,6 +14,7 @@ circle_radius = 20
 gravity_speed = 10
 y_acc = 0 # y axis acceleration
 jumping = False
+collision_angle = [0,0,0,0] # top, bottom, right, left
 
 while running:
      
@@ -38,6 +39,7 @@ while running:
     #     if keys[pygame.K_s]:
     #         player_pos.y += 300 * dt
     
+
     if keys[pygame.K_a]:
         player_pos.x -= 300 * dt
     if keys[pygame.K_d]:
