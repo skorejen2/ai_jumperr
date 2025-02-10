@@ -69,6 +69,8 @@ rect_platform1 = pygame.Rect(screen.get_width()* 0.55, screen.get_height() * 0.6
 rect_platform2 = pygame.Rect(screen.get_width()* 0.62, screen.get_height() * 0.50, 120, 40)
 rect_platform3 = pygame.Rect(screen.get_width()* 0.70, screen.get_height() * 0.40, 150, 40)
 
+
+
 while running:
      
     # poll for events
@@ -82,21 +84,17 @@ while running:
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("purple")
 
-    
+    rect_floor = pygame.Rect(0, screen.get_height() * 0.73, screen.get_width(), 20)
 
-    platforms = [rect_platform1, rect_platform2, rect_platform3]
-    
-    
-    # print(f"circle x:{ball.player_pos[0]}, circle y: {ball.player_pos[1]}, y_acc: {y_acc}")
-
-    # Draw elements
-    # print(f'Ball x position predraw collision check: {ball.player_pos.x}')
-    pygame.draw.circle(screen, "red", ball.player_pos, ball.radius)
+    rect_platform1 = pygame.Rect(screen.get_width() * 0.60, screen.get_height() * 0.65, 150, 20)
+    rect_platform2 = pygame.Rect(screen.get_width() * 0.75, screen.get_height() * 0.60, 100, 20)
+    rect_platform3 = pygame.Rect(screen.get_width() * 0.85, screen.get_height() * 0.55, 50, 20)
+    print(f"circle x:{player_pos[0]}, circle y: {player_pos[1]}, y_acc: {y_acc}")
+    pygame.draw.circle(screen, "red", player_pos, 40)
     pygame.draw.rect(screen, "green", rect_floor)
     pygame.draw.rect(screen, "blue", rect_platform1)
     pygame.draw.rect(screen, "blue", rect_platform2)
     pygame.draw.rect(screen, "blue", rect_platform3)
-
     keys = pygame.key.get_pressed()
     # the player cannot use downward key, the gravity is working
     # if (player_pos[1]+circle_radius <= rect_floor.top-rect_floor.height ):
@@ -144,7 +142,7 @@ while running:
 
     if(y_acc > 0):
         player_pos.y -= y_acc * dt
-        y_acc -= 50
+        y_acc -= 40
         gravity_speed += 2
         
 
