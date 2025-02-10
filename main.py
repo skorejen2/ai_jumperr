@@ -71,7 +71,6 @@ rect_platform3 = pygame.Rect(screen.get_width()* 0.70, screen.get_height() * 0.4
 
 while running:
      
-    
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
@@ -104,20 +103,20 @@ while running:
     #     if keys[pygame.K_s]:
     #         player_pos.y += 300 * dt
     
-<<<<<<< HEAD
-=======
     # IF KEY PRESSED AND COLLISION HAPPENING, DISABLE MOVEMENT INTO THAT DIRECTION
-
+    collision = False
     for platform in platforms:
 
-        collision = check_collision_rect_ball(ball, rect_platform1)
+        collision = check_collision_rect_ball(ball, platform)
         if collision:
             if collision["top"]:
                 print("COLLISION top")
                 gravity_speed = 0
                 y_acc = 0
-                ball.player_pos.y = platform.top - ball.radius
-
+                if(not keys.pygame.K_w):
+                    ball.player_pos.y = platform.top - ball.radius
+                else:
+                    y_acc = 1200
             if collision["bottom"]:
                 print("COLLISION bottom")
                 y_acc = 0
@@ -133,31 +132,27 @@ while running:
                 ball.player_pos.x = platform.right + ball.radius
         else:
             gravity_speed = 10
-
-            
-
     
->>>>>>> 142099031ff8669b7d123df70b068b2e6207f484
 
     if keys[pygame.K_a]:
         player_pos.x -= 300 * dt
     if keys[pygame.K_d]:
         player_pos.x += 300 * dt
     
-    if (player_pos[1]+circle_radius <= rect_floor.top-rect_floor.height ):
+    if (ball.player_pos.y+circle_radius <= rect_floor.top ):
          player_pos.y += gravity_speed * 20 * dt
 
-    
+    if(y_acc > 0):
+        player_pos.y -= y_acc * dt
+        y_acc -= 50
+        gravity_speed += 2
+        
 
     if(y_acc == 0 and player_pos[1]+circle_radius >= rect_floor.top-rect_floor.height):
         if keys[pygame.K_w]:
             print("w pressed")
-            y_acc = 1200
             gravity_speed = 0
-    elif(y_acc > 0):
-        player_pos.y -= y_acc * dt
-        y_acc -= 50
-        gravity_speed += 2
+    
            # player_pos.y -= 500 * dt
 
     # flip() the display to put your work on screen
