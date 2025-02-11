@@ -1,5 +1,5 @@
 # Example file showing a circle moving on screen
-import pygame, math # type: ignore
+import pygame, math
 from ball import Ball
 
 # pygame setup
@@ -49,27 +49,23 @@ def check_collision_rect_ball(ball : Ball, rect : pygame.Rect):
 
     distance = math.sqrt(distance_x**2 + distance_y**2)
 
-    print(f'Dist x: {distance_x} Dist y: {distance_y}')
+    # print(f'Dist x: {distance_x} Dist y: {distance_y}')
     if distance < ball.radius:
         collision_sides = {
             "top": ball.player_pos.y < rect.top and abs(ball.player_pos.y + ball.radius - rect.top) < 300,
             "bottom": ball.player_pos.y > rect.bottom and abs(ball.player_pos.y - ball.radius - rect.bottom) < 300,
-            "left": ball.player_pos.x < rect.left and abs(ball.player_pos.x + ball.radius - rect.left) < 300,
-            "right": ball.player_pos.x > rect.right and abs(ball.player_pos.x - ball.radius - rect.right) < 300,
+            "left": ball.player_pos.x < rect.left and abs(ball.player_pos.x + ball.radius - rect.left) < 5,
+            "right": ball.player_pos.x > rect.right and abs(ball.player_pos.x - ball.radius - rect.right) < 5,
         }
         return collision_sides
     return None
 
-        
-    
-
 ball = Ball(circle_radius, "red", player_pos)
 rect_floor = pygame.Rect(0, screen.get_height() * 0.73, screen.get_width(), 20)
-rect_platform1 = pygame.Rect(screen.get_width()* 0.55, screen.get_height() * 0.60, 100, 40)
-rect_platform2 = pygame.Rect(screen.get_width()* 0.62, screen.get_height() * 0.50, 120, 40)
-rect_platform3 = pygame.Rect(screen.get_width()* 0.70, screen.get_height() * 0.40, 150, 40)
-
-
+rect_platform1 = pygame.Rect(screen.get_width() * 0.55, screen.get_height() * 0.65, 150, 50)
+rect_platform2 = pygame.Rect(screen.get_width() * 0.70, screen.get_height() * 0.45, 100, 50)
+rect_platform3 = pygame.Rect(screen.get_width() * 0.88, screen.get_height() * 0.38, 50, 5)
+platforms = [rect_floor, rect_platform1,rect_platform2,rect_platform3]
 
 while running:
      
@@ -81,77 +77,71 @@ while running:
 
 
 
-    # fill the screen with a color to wipe away anything from last frame
-    screen.fill("purple")
-
-    rect_floor = pygame.Rect(0, screen.get_height() * 0.73, screen.get_width(), 20)
-
-    rect_platform1 = pygame.Rect(screen.get_width() * 0.60, screen.get_height() * 0.65, 150, 20)
-    rect_platform2 = pygame.Rect(screen.get_width() * 0.75, screen.get_height() * 0.60, 100, 20)
-    rect_platform3 = pygame.Rect(screen.get_width() * 0.85, screen.get_height() * 0.55, 50, 20)
-    print(f"circle x:{player_pos[0]}, circle y: {player_pos[1]}, y_acc: {y_acc}")
-    pygame.draw.circle(screen, "red", player_pos, 40)
-    pygame.draw.rect(screen, "green", rect_floor)
-    pygame.draw.rect(screen, "blue", rect_platform1)
-    pygame.draw.rect(screen, "blue", rect_platform2)
-    pygame.draw.rect(screen, "blue", rect_platform3)
     keys = pygame.key.get_pressed()
-    # the player cannot use downward key, the gravity is working
-    # if (player_pos[1]+circle_radius <= rect_floor.top-rect_floor.height ):
-    #     if keys[pygame.K_s]:
-    #         player_pos.y += 300 * dt
-    
-    # IF KEY PRESSED AND COLLISION HAPPENING, DISABLE MOVEMENT INTO THAT DIRECTION
+
+    # object collision logic
+
     collision = False
     for platform in platforms:
 
         collision = check_collision_rect_ball(ball, platform)
         if collision:
             if collision["top"]:
-                print("COLLISION top")
                 gravity_speed = 0
                 y_acc = 0
-                if(not keys.pygame.K_w):
+                if not keys[pygame.K_w]:
                     ball.player_pos.y = platform.top - ball.radius
                 else:
-                    y_acc = 1200
+                    y_acc = 1000
             if collision["bottom"]:
-                print("COLLISION bottom")
                 y_acc = 0
                 ball.player_pos.y = platform.bottom + ball.radius
 
             if collision["left"]:
-                print("COLLISION left")
                 ball.player_pos.x = platform.left - ball.radius
-                print(f'Ball x position post collision check: {ball.player_pos.x}')
 
             if collision["right"]:
-                print("COLLISION right")
                 ball.player_pos.x = platform.right + ball.radius
         else:
             gravity_speed = 10
     
 
     if keys[pygame.K_a]:
-        player_pos.x -= 300 * dt
+        ball.player_pos.x -= 300 * dt
     if keys[pygame.K_d]:
-        player_pos.x += 300 * dt
+        ball.player_pos.x += 300 * dt
     
-    if (ball.player_pos.y+circle_radius <= rect_floor.top ):
-         player_pos.y += gravity_speed * 20 * dt
+    if (ball.player_pos.y + circle_radius <= rect_floor.top):
+        ball.player_pos.y += gravity_speed * 20 * dt
 
-    if(y_acc > 0):
-        player_pos.y -= y_acc * dt
+
+    if(y_acc > 0 or not collision):
+        print(y_acc)
+        ball.player_pos.y -= y_acc * dt
         y_acc -= 40
         gravity_speed += 2
         
 
-    if(y_acc == 0 and player_pos[1]+circle_radius >= rect_floor.top-rect_floor.height):
-        if keys[pygame.K_w]:
-            print("w pressed")
-            gravity_speed = 0
-    
            # player_pos.y -= 500 * dt
+
+    # fill the screen with a color to wipe away anything from last frame
+    screen.fill("purple")
+    pygame.draw.circle(screen, "red", player_pos, 40)
+    pygame.draw.rect(screen, "green", rect_floor)
+    pygame.draw.rect(screen, "blue", rect_platform1)
+    pygame.draw.rect(screen, "blue", rect_platform2)
+    pygame.draw.rect(screen, "blue", rect_platform3)
+    
+    # Prevent ball from going off-screen
+    if ball.player_pos.x - ball.radius < 0:
+        ball.player_pos.x = ball.radius
+    if ball.player_pos.x + ball.radius > screen.get_width():
+        ball.player_pos.x = screen.get_width() - ball.radius
+    if ball.player_pos.y + ball.radius > screen.get_height():
+        ball.player_pos.y = screen.get_height() - ball.radius
+        gravity_speed = 0
+    if ball.player_pos.y - ball.radius < 0:
+        ball.player_pos.y = ball.radius
 
     # flip() the display to put your work on screen
     pygame.display.flip()

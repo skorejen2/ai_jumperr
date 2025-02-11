@@ -1,3 +1,5 @@
+import pygame
+
 class Ball():
     def __init__(self, radius, color, player_pos : pygame.Vector2):
         self._radius = radius
