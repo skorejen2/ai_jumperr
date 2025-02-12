@@ -30,3 +30,5 @@ class Ball():
     @player_pos.setter
     def player_pos(self, player_pos):
         self._player_pos = player_pos
+    
+    

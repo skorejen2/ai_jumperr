@@ -9,6 +9,10 @@ clock = pygame.time.Clock()
 running = True
 dt = 0.016
 
+PLATFORM_1_Y = 470  # Example y-coordinates
+PLATFORM_2_Y = 320
+PLATFORM_3_Y = 250  # Highest platform (goal)
+
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 circle_radius = 40
 
@@ -56,9 +60,9 @@ def check_collision_rect_ball(ball : Ball, rect : pygame.Rect):
 
 ball = Ball(circle_radius, "red", player_pos)
 rect_floor = pygame.Rect(0, screen.get_height() * 0.73, screen.get_width(), 20)
-rect_platform1 = pygame.Rect(screen.get_width() * 0.55, screen.get_height() * 0.65, 150, 50)
-rect_platform2 = pygame.Rect(screen.get_width() * 0.70, screen.get_height() * 0.45, 100, 50)
-rect_platform3 = pygame.Rect(screen.get_width() * 0.88, screen.get_height() * 0.38, 50, 5)
+rect_platform1 = pygame.Rect(screen.get_width() * 0.55, PLATFORM_1_Y, 150, 50)
+rect_platform2 = pygame.Rect(screen.get_width() * 0.70, PLATFORM_2_Y, 100, 50)
+rect_platform3 = pygame.Rect(screen.get_width() * 0.88, PLATFORM_3_Y, 50, 5)
 platforms = [rect_floor, rect_platform1,rect_platform2,rect_platform3]
 
 while running:
