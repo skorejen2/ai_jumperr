@@ -12,14 +12,8 @@ dt = 0.016
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 circle_radius = 40
 
-
-
 gravity_speed = 10
 y_acc = 0 # y axis acceleration
-jumping = False
-collision_angle = [0,0,0,0] # top, bottom, right, left
-
-
 
 def check_collision_rect_ball(ball : Ball, rect : pygame.Rect):
     x = ball._player_pos[0]
@@ -111,7 +105,7 @@ while running:
     if keys[pygame.K_d]:
         ball.player_pos.x += 300 * dt
     
-    if (ball.player_pos.y + circle_radius <= rect_floor.top):
+    if (ball.player_pos.y + ball.radius <= rect_floor.top):
         ball.player_pos.y += gravity_speed * 20 * dt
 
 
