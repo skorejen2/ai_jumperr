@@ -32,10 +32,10 @@ def check_collision_ball_rect(ball : Ball, rect : pygame.Rect):
         # print(f'Dist x: {distance_x} Dist y: {distance_y}')
         if distance < ball.radius:
             collision_sides = {
-                "top": ball.player_pos.y < rect.top and abs(ball.player_pos.y + ball.radius - rect.top) < 300,
-                "bottom": ball.player_pos.y > rect.bottom and abs(ball.player_pos.y - ball.radius - rect.bottom) < 300,
-                "left": ball.player_pos.x < rect.left and abs(ball.player_pos.x + ball.radius - rect.left) < 5,
-                "right": ball.player_pos.x > rect.right and abs(ball.player_pos.x - ball.radius - rect.right) < 5,
+                "top": ball.player_pos.y < rect.top and abs(ball.player_pos.y + ball.radius - rect.top) < 6,
+                "bottom": ball.player_pos.y > rect.bottom and abs(ball.player_pos.y - ball.radius - rect.bottom) < 6,
+                "left": ball.player_pos.x < rect.left and abs(ball.player_pos.x + ball.radius - rect.left) < 6,
+                "right": ball.player_pos.x > rect.right and abs(ball.player_pos.x - ball.radius - rect.right) < 6,
             }
             return collision_sides
         return None

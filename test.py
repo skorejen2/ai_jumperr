@@ -1,5 +1,5 @@
 from ballenv import BallEnv
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO,A2C
 
 env = BallEnv()
 model = PPO.load("ball_jumper_model")

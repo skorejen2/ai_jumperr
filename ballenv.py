@@ -11,7 +11,7 @@ GROUND_Y = 520  # Assuming the floor starts at y = 520
 PLATFORM_1_Y = 470  # Example y-coordinates
 PLATFORM_2_Y = 320
 PLATFORM_3_Y = 250  # Highest platform (goal)
-
+BALL_RADIUS = 40
 
 class BallEnv(gym.Env):
     def __init__(self):
@@ -25,7 +25,7 @@ class BallEnv(gym.Env):
         self.clock = pygame.time.Clock()
 
         # Ball properties
-        self.ball = Ball(40,"red",pygame.Vector2(self.screen.get_width()/2,self.screen.get_height()/2))
+        self.ball = Ball(BALL_RADIUS,"red",pygame.Vector2(self.screen.get_width()/2,self.screen.get_height()/2))
         self.gravity = 10
         self.y_acc = 0
         self.x_velocity = 0
@@ -44,15 +44,15 @@ class BallEnv(gym.Env):
         # Example: Discrete action space (0 or 1) and continuous observation space (array of floats)
         self.action_space = spaces.Discrete(3)  # Three possible actions: left, right, up
 
-        # observation for ball_x, ball_y, dx, dy, dx_platform, dy_platform, 
+        # observation for ball_x, ball_y, dx, dy, dx_platform, dy_platform, distance nearet platform 
         # current localtion of the ball
         # current velocity of the ball
         # current nearest platform location
         # set min and max value for each
 
         self.observation_space = spaces.Box(
-            low = np.array([-200,-100,-500,-1200,0,0]), 
-            high = np.array([SCREEN_WIDTH, SCREEN_HEIGHT+100, self._max_dx, self._max_dy, SCREEN_WIDTH, SCREEN_HEIGHT]),
+            low = np.array([-200,-100,-500,-1200,0,0,0]), 
+            high = np.array([SCREEN_WIDTH, SCREEN_HEIGHT+100, self._max_dx, self._max_dy, SCREEN_WIDTH, SCREEN_HEIGHT, 1500]),
             dtype=np.float32
             )
         
@@ -70,18 +70,20 @@ class BallEnv(gym.Env):
     # we get 5px movement per fps
     def step(self, action):
         # Apply action and return the new state, reward, done flag, and additional info
-
+        reward = -0.05
         # Handle movement
         if action == 0:  # Move left
-            self.ball.player_pos.x -= -5
+            self.ball.player_pos.x -= 10
+            #reward = 0.001
         elif action == 1:  # Move right
-            self.ball.player_pos.x += 5
+            self.ball.player_pos.x += 10
+            #reward = 0.001
 
 
         # Apply gravity
         self.y_acc += 1
         self.ball.player_pos.y += self.y_acc
-        collision = False
+
         for i, platform in enumerate(self.platforms):
             collision = check_collision_ball_rect(self.ball, platform)
             if collision:
@@ -102,21 +104,45 @@ class BallEnv(gym.Env):
                     self.ball.player_pos.x = platform.right + self.ball.radius
                     self.x_velocity = 0
 
-        reward = -0.1 
-        if check_collision_ball_rect(self.ball, self.platforms[0]) and action == 2:
-            reward = 1 # Reward jumping onto platforms
-        done = False
-        if PLATFORM_1_Y > self.ball.player_pos.y and self.ball.player_pos.y <= PLATFORM_2_Y:
-            reward = 3
-        elif(PLATFORM_2_Y > self.ball.player_pos.y and self.ball.player_pos.y <= PLATFORM_3_Y):
-            reward = 5
-        elif(self.ball.player_pos.y <= PLATFORM_3_Y):
-            reward = 10
-        # Heavy penalty for falling off
-        if self.ball.player_pos.y > GROUND_Y + 50:  
-            reward = -10  # Strong penalty for falling
-            done = True   # End episode if ball falls off
         
+        
+        done = False
+        # print(f'Ball x: {self.ball.player_pos.x}, y: {self.ball.player_pos.y}, action = {action}, plat1_y = {PLATFORM_1_Y}, plat2_y = {PLATFORM_2_Y}')
+        if action == 2:
+            pass # Reward jumping onto platforms
+
+        # Get distance to the nearest platform
+        _, _, dist = get_closest_point_of_the_platform(self.ball, self.platforms[3])
+
+        # Reward for reducing distance to platforms
+        reward += (1/dist) * 5  # Encourage movement toward platforms
+        print(f'Reward: {reward}, dist {dist}')
+        collision_plat1 = check_collision_ball_rect(self.ball, self.platforms[1])
+        if((self.ball.player_pos.y < PLATFORM_2_Y-40) and collision_plat1 is not None and collision_plat1["top"]):
+            print("Platform 1 reached")
+            reward = 100
+        elif(self.ball.player_pos.y < PLATFORM_2_Y-40):
+            print("Platform 2 reached")
+            reward = 200
+        elif(self.ball.player_pos.y < PLATFORM_3_Y):
+            print("Platform 3 reached")
+            reward = 500
+        # if (PLATFORM_1_Y > self.ball.player_pos.y) and (self.ball.player_pos.y <= PLATFORM_2_Y):
+        #     print("Ball reached plat 1")
+        #     reward = 3
+        # elif(PLATFORM_2_Y > self.ball.player_pos.y) and (self.ball.player_pos.y <= PLATFORM_3_Y):
+        #     print("Ball reached plat 2")
+        #     reward = 5
+        # elif(self.ball.player_pos.y <= PLATFORM_3_Y):
+        #     print("Ball reached plat 3")
+        #     reward = 10
+        # Heavy penalty for falling off
+        if self.ball.player_pos.y > GROUND_Y:
+            print(self.ball.player_pos.y)
+            print("Ball fell down")
+            reward = -100  # Strong penalty for falling
+            done = True   # End episode if ball falls off
+        print(f'Reward: {reward}, dist {dist}')
         # ✅ Return 5 values: observation, reward, terminated, truncated, info
         observation = self._get_obs()
         terminated = done  # True if the episode should end
@@ -124,19 +150,19 @@ class BallEnv(gym.Env):
         return observation, reward, terminated, truncated, {}
 
     def _get_obs(self):
-        nearest_platform = min(self.platforms, key = lambda p: abs(self.ball.player_pos.y - p.y))
-        # check random rectangle (this case first one - floor)
-        nearest_x, nearest_y, distance = get_closest_platform_data(self.ball, self.platforms)
+        nearest_x, nearest_y, distance_nearest = get_closest_platform_data(self.ball, self.platforms)
+        
         return np.array([self.ball.player_pos.x,
                          self.ball.player_pos.y,
                          self.x_velocity,
                          self.y_acc,
                          nearest_x,
                          nearest_y,
+                         distance_nearest
                          ], dtype=np.float32)
     def render(self):
         self.screen.fill((0, 0, 0))
-        pygame.draw.circle(self.screen, "red", (int(self.ball.player_pos.x), int(self.ball.player_pos.y)), 20)
+        pygame.draw.circle(self.screen, "red", (int(self.ball.player_pos.x), int(self.ball.player_pos.y)), self.ball.radius)
         for platform in self.platforms:
             pygame.draw.rect(self.screen, "green", platform)
         pygame.display.flip()
