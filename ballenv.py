@@ -80,14 +80,13 @@ class BallEnv(gym.Env):
             #reward = 0.001
 
 
-        # Apply gravity
-        self.y_acc += 1
-        self.ball.player_pos.y += self.y_acc
+        
 
         for i, platform in enumerate(self.platforms):
             collision = check_collision_ball_rect(self.ball, platform)
             if collision:
                 if collision["top"]:
+                    print("Collision top")
                     self.y_acc = 0
                     if not action == 2:
                         self.ball.player_pos.y = platform.top - self.ball.radius
@@ -104,7 +103,9 @@ class BallEnv(gym.Env):
                     self.ball.player_pos.x = platform.right + self.ball.radius
                     self.x_velocity = 0
 
-        
+        # Apply gravity
+        self.y_acc += 1
+        self.ball.player_pos.y += self.y_acc
         
         done = False
         # print(f'Ball x: {self.ball.player_pos.x}, y: {self.ball.player_pos.y}, action = {action}, plat1_y = {PLATFORM_1_Y}, plat2_y = {PLATFORM_2_Y}')
@@ -112,21 +113,23 @@ class BallEnv(gym.Env):
             pass # Reward jumping onto platforms
 
         # Get distance to the nearest platform
-        _, _, dist = get_closest_point_of_the_platform(self.ball, self.platforms[3])
+        _, _, dist = get_closest_point_of_the_platform(self.ball, self.platforms[2])
 
         # Reward for reducing distance to platforms
-        reward += (1/dist) * 5  # Encourage movement toward platforms
+        reward += (1/dist)  # Encourage movement toward platforms
         print(f'Reward: {reward}, dist {dist}')
         collision_plat1 = check_collision_ball_rect(self.ball, self.platforms[1])
-        if((self.ball.player_pos.y < PLATFORM_2_Y-40) and collision_plat1 is not None and collision_plat1["top"]):
+        collision_plat2 = check_collision_ball_rect(self.ball, self.platforms[2])
+        collision_plat3 = check_collision_ball_rect(self.ball, self.platforms[3])
+        if(collision_plat1 is not None and collision_plat1["top"]):
             print("Platform 1 reached")
-            reward = 100
-        elif(self.ball.player_pos.y < PLATFORM_2_Y-40):
+            reward = 1000
+        elif(collision_plat2 is not None and collision_plat2["top"]):
             print("Platform 2 reached")
-            reward = 200
-        elif(self.ball.player_pos.y < PLATFORM_3_Y):
+            reward = 2000
+        elif(collision_plat3 is not None and collision_plat3["top"]):
             print("Platform 3 reached")
-            reward = 500
+            reward = 30000
         # if (PLATFORM_1_Y > self.ball.player_pos.y) and (self.ball.player_pos.y <= PLATFORM_2_Y):
         #     print("Ball reached plat 1")
         #     reward = 3
