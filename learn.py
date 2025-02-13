@@ -7,7 +7,7 @@ env = BallEnv()
 # Initialize the A2C model with the custom environment
 model = PPO("MlpPolicy", env, verbose=1, learning_rate=0.0003)
 
-model.learn(total_timesteps=20000)
+model.learn(total_timesteps=50000)
 
 # Save model
 model.save("ball_jumper_model")

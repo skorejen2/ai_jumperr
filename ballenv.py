@@ -3,7 +3,7 @@ from gymnasium import spaces
 import pygame
 import numpy as np
 from ball import Ball
-from collisions import check_collision_ball_rect, get_closest_point_of_the_platform, get_closest_platform_data
+from collisions import check_collision_ball_rect, get_closest_point_and_distance_to_the_platform, get_closest_platform_data,get_distance_to_platforms
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -70,13 +70,13 @@ class BallEnv(gym.Env):
     # we get 5px movement per fps
     def step(self, action):
         # Apply action and return the new state, reward, done flag, and additional info
-        reward = -0.05
+        
         # Handle movement
         if action == 0:  # Move left
-            self.ball.player_pos.x -= 10
+            self.ball.player_pos.x -= 5
             #reward = 0.001
         elif action == 1:  # Move right
-            self.ball.player_pos.x += 10
+            self.ball.player_pos.x += 5
             #reward = 0.001
 
 
@@ -113,33 +113,45 @@ class BallEnv(gym.Env):
             pass # Reward jumping onto platforms
 
         # Get distance to the nearest platform
-        _, _, dist = get_closest_point_of_the_platform(self.ball, self.platforms[2])
-
+        _, _, dist = get_closest_point_and_distance_to_the_platform(self.ball, self.platforms[3])
+        platform_distances = get_distance_to_platforms(self.ball, self.platforms[1:])
+        
+        
         # Reward for reducing distance to platforms
-        reward += (1/dist)  # Encourage movement toward platforms
+        reward = -0.1 # Encourage movement toward platforms
+
+        for p in platform_distances:
+            print(p["number"], p["distance"])
+            match p["number"]:
+                case 1:
+                    reward -= 1/p["distance"]
+                case 2:
+                    reward -= 1/p["distance"]
+                case 3:
+                    reward += 1/p["distance"]
+
+        
+        
         print(f'Reward: {reward}, dist {dist}')
+        collision_plat0 = check_collision_ball_rect(self.ball, self.platforms[0])
         collision_plat1 = check_collision_ball_rect(self.ball, self.platforms[1])
         collision_plat2 = check_collision_ball_rect(self.ball, self.platforms[2])
         collision_plat3 = check_collision_ball_rect(self.ball, self.platforms[3])
+
+        if self.y_acc != 0:
+            reward += 1
+        if (collision_plat0 is not None and collision_plat0["top"]):
+            reward = -100
         if(collision_plat1 is not None and collision_plat1["top"]):
             print("Platform 1 reached")
-            reward = 1000
+            reward += 10
         elif(collision_plat2 is not None and collision_plat2["top"]):
             print("Platform 2 reached")
-            reward = 2000
+            reward += 200000
         elif(collision_plat3 is not None and collision_plat3["top"]):
             print("Platform 3 reached")
-            reward = 30000
-        # if (PLATFORM_1_Y > self.ball.player_pos.y) and (self.ball.player_pos.y <= PLATFORM_2_Y):
-        #     print("Ball reached plat 1")
-        #     reward = 3
-        # elif(PLATFORM_2_Y > self.ball.player_pos.y) and (self.ball.player_pos.y <= PLATFORM_3_Y):
-        #     print("Ball reached plat 2")
-        #     reward = 5
-        # elif(self.ball.player_pos.y <= PLATFORM_3_Y):
-        #     print("Ball reached plat 3")
-        #     reward = 10
-        # Heavy penalty for falling off
+            reward += 30000000
+
         if self.ball.player_pos.y > GROUND_Y:
             print(self.ball.player_pos.y)
             print("Ball fell down")
@@ -154,7 +166,7 @@ class BallEnv(gym.Env):
 
     def _get_obs(self):
         nearest_x, nearest_y, distance_nearest = get_closest_platform_data(self.ball, self.platforms)
-        
+        print(nearest_x, nearest_y)
         return np.array([self.ball.player_pos.x,
                          self.ball.player_pos.y,
                          self.x_velocity,
