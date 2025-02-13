@@ -3,8 +3,8 @@ from ball import Ball
 import math
 
 def check_collision_ball_rect(ball : Ball, rect : pygame.Rect):
-        x = ball.player_pos[0]
-        y = ball.player_pos[1]
+        x = ball.player_pos.x
+        y = ball.player_pos.y
         closest_x = 0
         closest_y = 0
 
@@ -32,10 +32,10 @@ def check_collision_ball_rect(ball : Ball, rect : pygame.Rect):
         # print(f'Dist x: {distance_x} Dist y: {distance_y}')
         if distance < ball.radius:
             collision_sides = {
-                "top": ball.player_pos.y < rect.top and abs(ball.player_pos.y + ball.radius - rect.top) <= 50,
-                "bottom": ball.player_pos.y > rect.bottom and abs(ball.player_pos.y - ball.radius - rect.bottom) <= 50,
-                "left": ball.player_pos.x < rect.left and abs(ball.player_pos.x + ball.radius - rect.left) <= 5,
-                "right": ball.player_pos.x > rect.right and abs(ball.player_pos.x - ball.radius - rect.right) <= 5,
+                "top": ball.player_pos.y < rect.top and abs(ball.player_pos.y + ball.radius - rect.top) < 50,
+                "bottom": ball.player_pos.y > rect.bottom and abs(ball.player_pos.y - ball.radius - rect.bottom) < 50,
+                "left": ball.player_pos.x < rect.left and abs(ball.player_pos.x + ball.radius - rect.left) < 10,
+                "right": ball.player_pos.x > rect.right and abs(ball.player_pos.x - ball.radius - rect.right) < 10,
             }
             return collision_sides
         return None
@@ -86,7 +86,7 @@ def get_distance_to_platforms(ball, platforms):
     arr_platforms = []
     for i, p in enumerate(platforms):
         x,y, dist = get_closest_point_and_distance_to_the_platform(ball, p)
-        arr_platforms.append({"number":i, "distance":dist, "platform":p})
+        #arr_platforms.append({"number":i, "distance":dist, "platform":p})
 
     return arr_platforms
 

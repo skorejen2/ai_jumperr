@@ -10,5 +10,6 @@ for _ in range(1000):
     obs, reward, done, truncated, _ = env.step(action)
 
     env.render()
+    
     if done:
         obs, _ = env.reset()
