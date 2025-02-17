@@ -1,3 +1,6 @@
+## The project involded using PPO for propagating a ball to learn how to jump for the highest placed platform
+## The project was done solely hobbistically, enjoy
+
 ## To run the project run:
 
 ```
